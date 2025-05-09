@@ -41,7 +41,7 @@ class RawEditor extends Component {
 
       if (editor) {
         editor.scrollTo({
-          top: editor.scrollHeight,
+          top: 0,
           left: 0,
           behavior: "smooth"
         });

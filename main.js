@@ -95,7 +95,12 @@
       "unload",
       "slotchange"
     ];
-    /** @private */
+    /**
+     * Shadow DOM 내부에 HTML 템플릿을 생성합니다.
+     * @private
+     * @param {string} htmlString - 렌더링할 HTML 문자열
+     * @returns {DocumentFragment} - 렌더링된 DocumentFragment
+     */
     _createTemplate(htmlString) {
       const template = document.createElement("template");
       template.innerHTML = `
@@ -108,7 +113,10 @@
     `;
       return template.content;
     }
-    /** @private */
+    /**
+     * Shadow DOM에 컴포넌트를 렌더링합니다.
+     * @private
+     */
     _render() {
       const htmlString = this.render();
       const fragment = this._createTemplate(htmlString);
@@ -120,9 +128,12 @@
       this._render();
       this.afterRender();
     }
-    /** 
+    /**
+     * 이벤트 핸들러를 처리합니다.
+     * 이벤트 버블링, 캡쳐 기능을 이용해서 shadowRoot에서 처리
+     * 
      * @private
-     * @param {Event} event
+     * @param {Event} event - 트리거된 이벤트 객체
      */
     _handleEvent(event) {
       const target = (
@@ -144,6 +155,7 @@
     }
     // -----------------
     // life cycle methods
+    // 컴포넌트 생명주기와 관련된 methods
     constructor() {
       super();
       this.shadowRoot = this.attachShadow({ mode: "open" });
@@ -171,6 +183,7 @@
     }
     // -----------------
     // nested methods
+    // 각 컴포넌트에서 활용할 수 있는 methods
     setState(newState) {
       this.state = { ...this.state, ...newState };
       this._rerender();
@@ -196,20 +209,27 @@
     styles = css``;
     init() {
     }
+    /**
+     * 렌더링 로직을 정의합니다.
+     * @returns {string} 렌더링할 HTML 문자열
+     */
     render() {
       return html``;
     }
+    /** 첫 렌더링 이후 호출됩니다. */
     afterRenderFirst() {
     }
+    /** 매 렌더링 이후 호출됩니다. */
     afterRender() {
     }
+    /** 컴포넌트가 DOM에서 제거될 때 호출됩니다. */
     afterDeleted() {
     }
   };
   var PageComponent = class extends Component {
     /**
      * 특정 path으로 이동
-     * @param {string} path - The path to navigate to.
+     * @param {string} path
      */
     navigate(path) {
       window.history.pushState({}, "", path);
@@ -647,6 +667,8 @@
     }
     styles = css`
     section {
+      width: 100%;
+      height: 100%;
       box-shadow: 0px 4px 10px 2px rgba(0,0,0,0.1);
       border-radius: 16px;
       background-color: var(--soft-mist);
@@ -1354,7 +1376,7 @@
         const editor = this.query(".json-editor");
         if (editor) {
           editor.scrollTo({
-            top: editor.scrollHeight,
+            top: 0,
             left: 0,
             behavior: "smooth"
           });
@@ -1558,7 +1580,7 @@
     }
     styles = css`
     .home {
-      max-width: var(--screen-md);
+      max-width: var(--screen-xl);
       margin: auto;
       padding: 48px;
     }
@@ -1572,15 +1594,27 @@
     }
 
     .contents {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 50%;
       gap: 24px;
+    }
+
+    .contents app-container:last-child {
+      grid-column: 1/3;
     }
 
     .table-container {
       padding: 48px 18px;
       border-radius: 12px;
       background-color: var(--white);
+    }
+
+    @media (max-width: 1100px) {
+      .contents {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
     }
   `;
     afterRenderFirst() {
@@ -1674,7 +1708,9 @@
       --raspberry-punch: #FF3277;
       --amber-flame: #FEB40E;
 
-      --screen-md: 1280px;
+      --screen-lg: 1280px;
+      --screen-xl: 1480px;
+      --screen-2xl: 1680px;
 
       font-family: Roboto;
     }

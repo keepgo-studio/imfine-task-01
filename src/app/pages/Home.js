@@ -64,7 +64,7 @@ class Home extends PageComponent {
 
   styles = css`
     .home {
-      max-width: var(--screen-md);
+      max-width: var(--screen-xl);
       margin: auto;
       padding: 48px;
     }
@@ -78,15 +78,27 @@ class Home extends PageComponent {
     }
 
     .contents {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 50%;
       gap: 24px;
+    }
+
+    .contents app-container:last-child {
+      grid-column: 1/3;
     }
 
     .table-container {
       padding: 48px 18px;
       border-radius: 12px;
       background-color: var(--white);
+    }
+
+    @media (max-width: 1100px) {
+      .contents {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
     }
   `;
 

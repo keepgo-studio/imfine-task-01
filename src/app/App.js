@@ -63,7 +63,9 @@ class App extends Component {
       --raspberry-punch: #FF3277;
       --amber-flame: #FEB40E;
 
-      --screen-md: 1280px;
+      --screen-lg: 1280px;
+      --screen-xl: 1480px;
+      --screen-2xl: 1680px;
 
       font-family: Roboto;
     }
