@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "build": "npx esbuild src/index.js --bundle --outfile=main.js",
+    "build:watch": "npx esbuild src/index.js --bundle --outfile=main.js --watch"
+  }
+}
