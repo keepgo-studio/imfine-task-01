@@ -82,18 +82,18 @@ class DataModel {
    * @param {number} val
    */
   add(key, val) {
-    const index = this._findIndex(key);
+    const _key = key ? key : String(++this._increment);
+    const index = this._findIndex(_key);
 
     if (index !== -1) {
-      throw new Error(`Cannot add "${key}", exist key`);
+      if (!key) throw new Error("Increment error, try again");
+      else throw new Error(`Cannot add "${_key}", exist key`);
     }
-    
+
     this._data.push({
-      key: key ? key : String(this._increment), 
+      key: _key,
       val
     });
-
-    this._increment++;
   }
 
   /** @param {string} key */

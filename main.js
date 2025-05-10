@@ -340,6 +340,7 @@
       maxValue: 0,
       minValue: 0,
       tickStep: 0,
+      tickCount: 10,
       zeroTopRatio: 0
     };
     init() {
@@ -356,13 +357,14 @@
               colors[item.key] = getColorByKey(item.key);
             }
           });
+          const { tickCount } = this.state;
           const actualMaxValue = Math.max(...allData.map((item) => item.val)) || 0;
           const maxValue = actualMaxValue < 0 ? 0 : actualMaxValue;
           const actualMinValue = Math.min(...allData.map((item) => item.val)) || 0;
           const minValue = actualMinValue > 0 ? 0 : actualMinValue;
           const totalLength = Math.abs(maxValue) + Math.abs(minValue);
           const zeroTopRatio = minValue === 0 ? 0 : Math.abs(minValue) / totalLength;
-          const tickStep = Math.ceil(totalLength / 10);
+          const tickStep = Math.ceil(totalLength / tickCount);
           this.setState({
             allData,
             colors,
@@ -399,16 +401,16 @@
         allData,
         colors,
         minValue,
-        tickStep
+        tickStep,
+        tickCount
       } = this.state;
-      const tickCount = 10;
       return html`
       <div class="chart-container">
         <!-- Y-Axis -->
         <div class="y-axis">
-          ${map(range(tickCount + 1), (_, i) => {
-        const value = minValue + i * tickStep;
-        return html`<div class="y-tick">${String(value)}</div>`;
+          ${map(range(tickCount + 1), (_, index) => {
+        const value = minValue + index * tickStep;
+        return html`<div class="y-tick" data-index=${index}>${String(value)}</div>`;
       })}
         </div>
 
@@ -449,6 +451,7 @@
         allData,
         maxValue,
         minValue,
+        tickCount,
         zeroTopRatio
       } = this.state;
       const allBars = this.queryAll(".bar");
@@ -472,6 +475,22 @@
         await delay(800);
         barElem.style.transition = "";
       });
+      const yAxis = (
+        /** @type {HTMLDivElement} */
+        this.query(".y-axis")
+      );
+      const allYTicks = this.queryAll(".y-tick");
+      const totalHeight = yAxis.clientHeight;
+      const step = totalHeight / tickCount;
+      allYTicks.forEach(async (elem) => {
+        const tickElem = (
+          /** @type {HTMLDivElement} */
+          elem
+        );
+        const index = Number(tickElem.dataset.index);
+        tickElem.style.bottom = `${index * step}px`;
+        tickElem.style.transform = "translateY(50%)";
+      });
     }
     styles = css`
     .chart-container {
@@ -483,12 +502,7 @@
     }
 
     .y-axis {
-      overflow: hidden;
       position: relative;
-      display: flex;
-      flex-direction: column-reverse;
-      align-items: flex-end;
-      justify-content: space-between;
       height: 100%;
       font-size: 14px;
       color: #555;
@@ -497,6 +511,9 @@
     }
 
     .y-tick {
+      position: absolute;
+      bottom: 0;
+      right: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -532,9 +549,6 @@
       position: relative;
       width: 100%;
       border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       color: #000;
       font-weight: bold;
       transition: color 0.25s, background-color 0.3s;
@@ -544,9 +558,17 @@
       background-color: #333 !important;
     }
 
+    .label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
     .x-axis {
       grid-column: 2/3;
       display: flex;
+      gap: 10px;
       justify-content: space-between;
       padding: 0 4px;
       margin-top: 8px;
@@ -746,15 +768,16 @@
      * @param {number} val
      */
     add(key, val) {
-      const index = this._findIndex(key);
+      const _key = key ? key : String(++this._increment);
+      const index = this._findIndex(_key);
       if (index !== -1) {
-        throw new Error(`Cannot add "${key}", exist key`);
+        if (!key) throw new Error("Increment error, try again");
+        else throw new Error(`Cannot add "${_key}", exist key`);
       }
       this._data.push({
-        key: key ? key : String(this._increment),
+        key: _key,
         val
       });
-      this._increment++;
     }
     /** @param {string} key */
     remove(key) {
@@ -1265,6 +1288,13 @@
         this.setState({ allData });
       });
     }
+    unsupportYetHTML() {
+      return html`
+      <div style="width: 100%; height: 100%; display: flex; align-items:center; justify-content: center; color:var(--raspberry-punch);">
+        This chart is unspport yet
+      </div>
+    `;
+    }
     renderChart() {
       const { chartTypeList, currentTypeIndex } = this.state;
       return map(chartTypeList, (chartType, index) => {
@@ -1272,6 +1302,8 @@
         switch (chartType) {
           case "bar":
             return html`<app-bar-chart class="chart"></app-bar-chart>`;
+          case "line":
+            return this.unsupportYetHTML();
           default:
             return;
         }
@@ -1395,7 +1427,7 @@
      */
     submitHandler(e) {
       e.preventDefault();
-      const { typedJson, rawJson } = this.state;
+      const { typedJson } = this.state;
       const jsonStr = typedJson.replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3');
       try {
         const parsedData = JSON.parse(jsonStr);
@@ -1403,8 +1435,7 @@
       } catch (error) {
         console.error(error);
         this.setState({
-          error: `JSON \uD615\uC2DD\uC774 \uC798\uBABB\uB418\uC5C8\uC2B5\uB2C8\uB2E4: ${error.message}`,
-          typedJson: rawJson
+          error: `JSON \uD615\uC2DD\uC774 \uC798\uBABB\uB418\uC5C8\uC2B5\uB2C8\uB2E4: ${error.message}`
         });
       }
     }
@@ -1434,14 +1465,14 @@
       const { typedJson, error } = this.state;
       return html`
       <form @submit=${this.submitHandler}>
-        <div class="actions">
+        <div class="actions ${error ? "changed" : ""}">
           <button type="button" @click=${this.reset} class="reset-btn">Reset</button>
           <button class="apply-btn">Apply</button>
         </div>
 
         ${error ? html`<p class="error">${error}</p>` : ""}
 
-        <pre 
+        <pre
           class="json-editor" 
           contenteditable="true"
           @input=${this.inputHandler}
@@ -1543,7 +1574,7 @@
             </app-container-title>
   
             <app-container-content>
-              <app-graph chart-type-list="bar"></app-graph>
+              <app-graph chart-type-list="bar,line"></app-graph>
             </app-container-content>
           </app-container>
 
@@ -1637,7 +1668,15 @@
         },
         {
           key: "May",
-          val: 23
+          val: 33
+        },
+        {
+          key: "June",
+          val: -23
+        },
+        {
+          key: "July",
+          val: 100
         }
       ]);
     }
@@ -1691,7 +1730,7 @@
         return html`<app-page-home></app-page-home>`;
       }
       const { route } = this.state;
-      if (route === "/") {
+      if (route === "/" || route === "/index.html") {
         return html`<app-page-home></app-page-home>`;
       } else {
         return html`<app-page-not-found></app-page-not-found>`;
