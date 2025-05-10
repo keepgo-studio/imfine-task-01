@@ -5,7 +5,7 @@ import { css } from "../config/styles.js";
 import { dataModel } from "../model/Data.js";
 
 /**
- * @typedef {"bar"} SupportChartType
+ * @typedef {"bar" | "line"} SupportChartType
  * @typedef {{
  *  allData: Array<{ key: string; val: number; }>;
  *  currentTypeIndex: number;
@@ -46,6 +46,14 @@ class Graph extends Component {
     });
   }
 
+  unsupportYetHTML() {
+    return html`
+      <div style="width: 100%; height: 100%; display: flex; align-items:center; justify-content: center; color:var(--raspberry-punch);">
+        This chart is unspport yet
+      </div>
+    `;
+  }
+
   renderChart() {
     const { chartTypeList, currentTypeIndex } = this.state;
 
@@ -54,6 +62,7 @@ class Graph extends Component {
 
       switch (chartType) {
         case "bar": return html`<app-bar-chart class="chart"></app-bar-chart>`
+        case "line": return this.unsupportYetHTML();
         default: return;
       }
     })

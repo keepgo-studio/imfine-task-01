@@ -64,7 +64,7 @@ class RawEditor extends Component {
   submitHandler(e) {
     e.preventDefault();
 
-    const { typedJson, rawJson } = this.state;
+    const { typedJson } = this.state;
     const jsonStr = typedJson.replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3');
 
     try {
@@ -75,7 +75,6 @@ class RawEditor extends Component {
 
       this.setState({
         error: `JSON 형식이 잘못되었습니다: ${error.message}`,
-        typedJson: rawJson
       });
     }
   }
@@ -111,14 +110,14 @@ class RawEditor extends Component {
 
     return html`
       <form @submit=${this.submitHandler}>
-        <div class="actions">
+        <div class="actions ${error ? "changed" : ""}">
           <button type="button" @click=${this.reset} class="reset-btn">Reset</button>
           <button class="apply-btn">Apply</button>
         </div>
 
         ${error ? html`<p class="error">${error}</p>` : ""}
 
-        <pre 
+        <pre
           class="json-editor" 
           contenteditable="true"
           @input=${this.inputHandler}

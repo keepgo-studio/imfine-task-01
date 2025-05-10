@@ -26,7 +26,7 @@ class Home extends PageComponent {
             </app-container-title>
   
             <app-container-content>
-              <app-graph chart-type-list="bar"></app-graph>
+              <app-graph chart-type-list="bar,line"></app-graph>
             </app-container-content>
           </app-container>
 
@@ -123,8 +123,16 @@ class Home extends PageComponent {
       },
       {
         key: "May",
-        val: 23
+        val: 33
       },
+      {
+        key: "June",
+        val: -23
+      },
+      {
+        key: "July",
+        val: 100
+      }
     ]);
   }
 }
