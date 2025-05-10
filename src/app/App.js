@@ -45,7 +45,7 @@ class App extends Component {
 
     const { route } = this.state;
 
-    if (route === '/') {
+    if (route === '/' || route === '/index.html') {
       return html`<app-page-home></app-page-home>`;
     } else {
       return html`<app-page-not-found></app-page-not-found>`;
